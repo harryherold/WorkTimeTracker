@@ -56,23 +56,23 @@ class TestDatabase(unittest.TestCase):
         row = cursor.fetchone()
         self.assertEqual(row[0], self.name_one)
 
-    # def test_insert_finished_work(self):
-    #     name = 'klaus'
-    #     start = self.get_date_time(2000, 4, 10, 12, 0)
-    #     end = self.get_date_time(2000, 4, 10, 13, 0)
-    #
-    #     self.db.insert_started_work(name, start)
-    #     self.db.insert_finished_work(name, end)
-    #
-    #     sql_cmd = 'select start, end, name, diff from finished_work where name = ?'
-    #     cursor = self.db.connection.cursor()
-    #     cursor.execute(sql_cmd, (name,))
-    #     row = cursor.fetchone()
-    #
-    #     self.assertEqual(row[0], start)
-    #     self.assertEqual(row[1], end)
-    #     self.assertEqual(row[2], name)
-    #     self.assertEqual(row[3], 1)
+    def test_insert_finished_work(self):
+        name = 'klaus'
+        start = self.get_date_time(2000, 10, 10, 12, 10)
+        end = self.get_date_time(2000, 10, 10, 13, 10)
+
+        self.db.insert_started_work(name, start)
+        self.db.insert_finished_work(name, end)
+
+        sql_cmd = 'select start, end, name, diff from work_times where name = ?'
+        cursor = self.db.connection.cursor()
+        cursor.execute(sql_cmd, (name,))
+        row = cursor.fetchone()
+
+        self.assertEqual(row[0], start)
+        self.assertEqual(row[1], end)
+        self.assertEqual(row[2], name)
+        self.assertEqual(row[3], 1.0)
 
     def test_start_exists(self):
         name = 'Baz'
