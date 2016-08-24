@@ -1,7 +1,8 @@
+import sys
 import os.path
+import argparse
 from time_database import TimeDatabase
 from datetime import datetime
-
 db_path = '../work_times.db'
 
 
@@ -35,10 +36,43 @@ class TimeTracker:
         self.database.insert_finished_work(name, t)
 
 
-def main():
-    tt = TimeTracker(db_path)
-    tt.start_activity("Foo")
-    tt.end_activity("Foo")
+def convert_datetime(t):
+    return datetime.strptime(t, "%d.%m.%Y-%H:%M")
 
 
-main()
+def is_datetime(t):
+    try:
+        convert_datetime(t)
+    except ValueError:
+        return False
+    return True
+
+
+def get_time_stamp(date_time_str):
+    t = None
+    if is_datetime(date_time_str):
+        t = convert_datetime(date_time_str)
+    return t
+
+tt = TimeTracker(db_path)
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-s", "--start", type=str,
+                    help="Datetime for starting an activity")
+
+parser.add_argument("-e", "--end", type=str,
+                    help="Datetime for ending an activity")
+
+parser.add_argument("activity", type=str,
+                    help="The activity name")
+
+args = parser.parse_args()
+
+if args.start is not None:
+    ts = get_time_stamp(args.start)
+    tt.start_activity(args.activity, ts)
+
+if args.end is not None:
+    te = get_time_stamp(args.end)
+    tt.end_activity(args.activity, te)
