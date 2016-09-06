@@ -1,9 +1,11 @@
+#!/bin/python3
+
 import sys
 import os.path
 import argparse
 from time_database import TimeDatabase
 from datetime import datetime
-db_path = '../work_times.db'
+db_path = '/home/cherold/Documents/work_times.db'
 
 
 class TimeTracker:
