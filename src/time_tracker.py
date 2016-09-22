@@ -1,10 +1,9 @@
 #!/bin/python3
 
-import sys
 import os.path
 import argparse
 from time_database import TimeDatabase
-from datetime import datetime
+from utils import TimeStamp
 db_path = '/home/cherold/Documents/work_times.db'
 
 
@@ -21,40 +20,22 @@ class TimeTracker:
     def __del__(self):
         self.database.close()
 
-    def start_activity(self, name, t=None):
-        if t is None:
-            t = datetime.now().strftime("%Y-%m-%d %H:%M")
+    def start_activity(self, name, t):
         if self.database.start_exists(name):
             print("This activity is already started")
             return
         self.database.insert_started_work(name, t)
 
-    def end_activity(self, name, t=None):
-        if t is None:
-            t = datetime.now().strftime("%Y-%m-%d %H:%M")
+    def end_activity(self, name, t):
         if not self.database.start_exists(name):
             print("This activity is not started")
             return
         self.database.insert_finished_work(name, t)
 
-
-def convert_datetime(t):
-    return datetime.strptime(t, "%d.%m.%Y-%H:%M")
-
-
-def is_datetime(t):
-    try:
-        convert_datetime(t)
-    except ValueError:
-        return False
-    return True
-
-
-def get_time_stamp(date_time_str):
-    t = None
-    if is_datetime(date_time_str):
-        t = convert_datetime(date_time_str)
-    return t
+    def show_started_work(self):
+        started_work = self.database.get_started_work()
+        for e in started_work:
+            print("{} => {}".format(e[0], e[1]))
 
 tt = TimeTracker(db_path)
 
@@ -66,15 +47,16 @@ parser.add_argument("-s", "--start", type=str,
 parser.add_argument("-e", "--end", type=str,
                     help="Datetime for ending an activity")
 
+# TODO Only important with start or end argument
 parser.add_argument("activity", type=str,
                     help="The activity name")
+
+parser.add_argument("--list", action='store_true')
 
 args = parser.parse_args()
 
 if args.start is not None:
-    ts = get_time_stamp(args.start)
-    tt.start_activity(args.activity, ts)
+    tt.start_activity(args.activity, TimeStamp(args.start))
 
 if args.end is not None:
-    te = get_time_stamp(args.end)
-    tt.end_activity(args.activity, te)
+    tt.end_activity(args.activity, TimeStamp(args.end))

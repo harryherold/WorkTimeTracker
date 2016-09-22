@@ -1,5 +1,6 @@
 import sqlite3
 
+from utils import TimeStamp
 
 class TimeDatabase:
     def __init__(self, filename):
@@ -24,12 +25,11 @@ class TimeDatabase:
         self.connection.commit()
         
     def insert_started_work(self, name, date):
-        """Date has to be in the format %Y-%m-%d %H:%M"""
 
         insert_cmd = 'insert into work_times (start, name) values (?, ?)'
         cursor = self.connection.cursor()
         try:
-            cursor.execute(insert_cmd, (date, name))
+            cursor.execute(insert_cmd, (str(date), name))
             self.connection.commit()
         except sqlite3.Error as err:
             print("Cannot store starting time in database")
@@ -38,14 +38,13 @@ class TimeDatabase:
             print("Stored in database")
 
     def insert_finished_work(self, name, date):
-        """Date has to be in the format %Y-%m-%d %H:%M"""
 
         update_cmd = 'update work_times set end = ?, ' \
                      'diff = cast(strftime(\'%s\', ?)- strftime(\'%s\',start) as REAL) / 60 / 60 ' \
                      'where end is NULL and name = ?'
         cursor = self.connection.cursor()
         try:
-            cursor.execute(update_cmd, (date, date, name))
+            cursor.execute(update_cmd, (str(date), str(date), name))
             self.connection.commit()
         except sqlite3.Error as err:
             print("Cannot store ending time in database")
