@@ -2,6 +2,7 @@
 
 import os.path
 import argparse
+
 from time_database import TimeDatabase
 from utils import TimeStamp
 db_path = '/home/cherold/Documents/work_times.db'
@@ -54,6 +55,10 @@ parser.add_argument("activity", type=str,
 parser.add_argument("--list", action='store_true')
 
 args = parser.parse_args()
+
+if args.list:
+    tt.show_started_work()
+    exit(0)
 
 if args.start is not None:
     tt.start_activity(args.activity, TimeStamp(args.start))

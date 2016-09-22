@@ -52,6 +52,18 @@ class TimeDatabase:
         else:
             print("Stored in database")
 
+    def get_started_work(self):
+        """Returns a structure that includes all started activities with time"""
+
+        search_cmd = 'select start, name from work_times where end is NULL'
+        cursor = self.connection.cursor()
+        cursor.execute(search_cmd)
+        rows = cursor.fetchall()
+        started_work = []
+        for row in rows:
+            started_work.append([row[0], row[1]])
+        return started_work
+
     def start_exists(self, name):
         """Tests whether a start timestamp exists for an activity"""
 
