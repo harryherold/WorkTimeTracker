@@ -1,21 +1,24 @@
 import sqlite3
-
+from typing import List
 from utils import TimeStamp
 
+
 class TimeDatabase:
-    def __init__(self, filename):
+    def __init__(self, filename: str):
         """Connects to the database"""
         self.filename = filename
+        # TODO May throws an exception
         self.connection = sqlite3.connect(self.filename)
 
-    def close(self):
+    def close(self) -> None:
         """Disconnect the database"""
         self.connection.close()
 
-    def create_tables(self):
+    def create_tables(self) -> None:
         """Creates database and tables"""
 
         cursor = self.connection.cursor()
+        # TODO Throws an execption
         cursor.execute('CREATE TABLE work_times (id integer,       \
                                                  start DATETIME, \
                                                  end DATETIME,   \
@@ -24,7 +27,7 @@ class TimeDatabase:
                                                  primary key(id))')
         self.connection.commit()
         
-    def insert_started_work(self, name, date):
+    def insert_started_work(self, name: str, date: TimeStamp) -> None:
 
         insert_cmd = 'insert into work_times (start, name) values (?, ?)'
         cursor = self.connection.cursor()
@@ -37,7 +40,7 @@ class TimeDatabase:
         else:
             print("Stored in database")
 
-    def insert_finished_work(self, name, date):
+    def insert_finished_work(self, name: str, date: TimeStamp) -> None:
 
         update_cmd = 'update work_times set end = ?, ' \
                      'diff = cast(strftime(\'%s\', ?)- strftime(\'%s\',start) as REAL) / 60 / 60 ' \
@@ -52,7 +55,7 @@ class TimeDatabase:
         else:
             print("Stored in database")
 
-    def get_started_work(self):
+    def get_started_work(self) -> List[List[str]]:
         """Returns a structure that includes all started activities with time"""
 
         search_cmd = 'select start, name from work_times where end is NULL'
@@ -64,7 +67,7 @@ class TimeDatabase:
             started_work.append([row[0], row[1]])
         return started_work
 
-    def start_exists(self, name):
+    def start_exists(self, name: str) -> bool:
         """Tests whether a start timestamp exists for an activity"""
 
         search_cmd = 'select exists(select 1 from work_times where end is NULL and name = ? limit 1)'

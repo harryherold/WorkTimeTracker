@@ -21,17 +21,17 @@ class TimeStamp:
     def __repr__(self):
         return self.__str__()
 
-    def day(self):
+    def day(self) -> int:
         return self.date_time.day
 
-    def month(self):
+    def month(self) -> int:
         return self.date_time.month
 
-    def year(self):
+    def year(self) -> int:
         return self.date_time.year
 
-    def hour(self):
+    def hour(self) -> int:
         return self.date_time.hour
 
-    def minute(self):
+    def minute(self) -> int:
         return self.date_time.minute
