@@ -1,13 +1,11 @@
-#!/bin/python3
-
+#!/usr/bin/env python3
+import sys
 import os.path
 import argparse
 
 from time_database import TimeDatabase
 from utils import TimeStamp
-
-# TODO Put it in config.py
-db_path = '/home/harry/src/WorkTimeTracker/work_times.db'
+from config import *
 
 
 class TimeTracker:
