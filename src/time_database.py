@@ -1,11 +1,12 @@
 import sqlite3
 from typing import List
-from utils import TimeStamp
+from utils import *
 
 
 class TimeDatabase:
-    def __init__(self, filename: str):
+    def __init__(self, filename: str, verbose=False):
         """Connects to the database"""
+        self.verbose = verbose
         self.filename = filename
         # TODO May throws an exception
         self.connection = sqlite3.connect(self.filename)
@@ -35,10 +36,10 @@ class TimeDatabase:
             cursor.execute(insert_cmd, (str(date), name))
             self.connection.commit()
         except sqlite3.Error as err:
-            print("Cannot store starting time in database")
-            print("Error:\n{}".format(err.args[0]))
+            print_error("Cannot store starting time in database")
+            print_error("{}".format(err.args[0]))
         else:
-            print("Stored in database")
+            print_info("Stored in database", self.verbose)
 
     def insert_finished_work(self, name: str, date: TimeStamp) -> None:
 
@@ -50,10 +51,10 @@ class TimeDatabase:
             cursor.execute(update_cmd, (str(date), str(date), name))
             self.connection.commit()
         except sqlite3.Error as err:
-            print("Cannot store ending time in database")
-            print("Error:\n{}".format(err.args[0]))
+            print_error("Cannot store ending time in database")
+            print_error("{}".format(err.args[0]))
         else:
-            print("Stored in database")
+            print_info("Stored in database", self.verbose)
 
     def get_started_work(self) -> List[List[str]]:
         """Returns a structure that includes all started activities with time"""

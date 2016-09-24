@@ -1,6 +1,21 @@
 from datetime import datetime
 
 
+def print_info(mesg: str, is_active=True):
+    if is_active:
+        print("[Info]    : {}".format(mesg))
+
+
+def print_warning(mesg: str, is_active=True):
+    if is_active:
+        print("[Warning] : {}".format(mesg))
+
+
+def print_error(mesg: str, is_active=True):
+    if is_active:
+        print("[Error]   : {}".format(mesg))
+
+
 class TimeStamp:
 
     def __init__(self, time_string):
