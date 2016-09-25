@@ -1,19 +1,48 @@
 from datetime import datetime
 
 
-def print_info(mesg: str, is_active=True):
-    if is_active:
-        print("[Info]    : {}".format(mesg))
+def always_active(f):
+    def _always_active(self, mesg: str, is_active=True):
+        return f(self, mesg, is_active=True)
+    return _always_active
 
 
-def print_warning(mesg: str, is_active=True):
-    if is_active:
-        print("[Warning] : {}".format(mesg))
+def prepend_tag(tag):
+    def _prepend_tag(f):
+        def wrapper(self, mesg: str, is_active=True):
+            if is_active:
+                return f(self, "{0:12s}: {1}".format('['+tag+']', mesg))
+        return wrapper
+    return _prepend_tag
 
 
-def print_error(mesg: str, is_active=True):
-    if is_active:
-        print("[Error]   : {}".format(mesg))
+class Logger:
+
+    def __init__(self, file_name=None):
+        self.out = None
+        if file_name is not None:
+            self.out = open(file_name, "w")
+
+    def __del__(self):
+        if self.out is not None:
+            self.out.close()
+
+    def print(self, mesg):
+        print(mesg, file=self.out)
+
+    @prepend_tag("Info")
+    def info(self, mesg: str, is_active=True) -> None:
+        print(mesg, file=self.out)
+
+    @always_active
+    @prepend_tag("Warning")
+    def warning(self, mesg: str, is_active=True) -> None:
+        print(mesg, file=self.out)
+
+    @always_active
+    @prepend_tag("Error")
+    def error(self, mesg: str, is_active=True) -> None:
+        print(mesg, file=self.out)
 
 
 class TimeStamp:

@@ -4,8 +4,9 @@ from utils import *
 
 
 class TimeDatabase:
-    def __init__(self, filename: str, verbose=False):
+    def __init__(self, filename: str, log: Logger, verbose=False):
         """Connects to the database"""
+        self.log = log
         self.verbose = verbose
         self.filename = filename
         # TODO May throws an exception
@@ -36,10 +37,10 @@ class TimeDatabase:
             cursor.execute(insert_cmd, (str(date), name))
             self.connection.commit()
         except sqlite3.Error as err:
-            print_error("Cannot store starting time in database")
-            print_error("{}".format(err.args[0]))
+            self.log.error("Cannot store starting time in database")
+            self.log.error("{}".format(err.args[0]))
         else:
-            print_info("Stored in database", self.verbose)
+            self.log.info("Stored in database", self.verbose)
 
     def insert_finished_work(self, name: str, date: TimeStamp) -> None:
 
@@ -51,10 +52,10 @@ class TimeDatabase:
             cursor.execute(update_cmd, (str(date), str(date), name))
             self.connection.commit()
         except sqlite3.Error as err:
-            print_error("Cannot store ending time in database")
-            print_error("{}".format(err.args[0]))
+            self.log.error("Cannot store ending time in database")
+            self.log.error("{}".format(err.args[0]))
         else:
-            print_info("Stored in database", self.verbose)
+            self.log.info("Stored in database", self.verbose)
 
     def get_started_work(self) -> List[List[str]]:
         """Returns a structure that includes all started activities with time"""

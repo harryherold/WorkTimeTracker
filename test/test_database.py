@@ -5,6 +5,7 @@ from datetime import datetime
 os.sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from time_database import TimeDatabase
+from utils import *
 
 test_db_name = './test.db'
 
@@ -30,7 +31,8 @@ class TestDatabase(unittest.TestCase):
 
     @classmethod
     def create_db(cls):
-        cls.db = TimeDatabase(test_db_name)
+        cls.log = Logger()
+        cls.db = TimeDatabase(test_db_name, cls.log)
         cls.db.create_tables()
 
     @classmethod
