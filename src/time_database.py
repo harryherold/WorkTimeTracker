@@ -9,7 +9,6 @@ class TimeDatabase:
         self.log = log
         self.verbose = verbose
         self.filename = filename
-        # TODO May throws an exception
         self.connection = sqlite3.connect(self.filename)
 
     def close(self) -> None:
@@ -28,7 +27,7 @@ class TimeDatabase:
                                                  diff real,   \
                                                  primary key(id))')
         self.connection.commit()
-        
+
     def insert_started_work(self, name: str, date: TimeStamp) -> None:
 
         insert_cmd = 'insert into work_times (start, name) values (?, ?)'

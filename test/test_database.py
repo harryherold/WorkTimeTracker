@@ -1,6 +1,7 @@
 import unittest
 import os
 from datetime import datetime
+from contextlib import closing
 
 os.sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "../src")))
 
@@ -21,28 +22,30 @@ class TestDatabase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.log = Logger()
         cls.create_db()
         cls.insert_started_work()
 
     @classmethod
     def tearDownClass(cls):
-        cls.db.close()
         os.remove(test_db_name)
 
     @classmethod
     def create_db(cls):
         cls.log = Logger()
-        cls.db = TimeDatabase(test_db_name, cls.log)
-        cls.db.create_tables()
+        with closing(TimeDatabase(test_db_name, cls.log)) as db:
+            db.create_tables()
 
     @classmethod
     def insert_started_work(cls):
         cls.name_one = 'Foo'
-        cls.db.insert_started_work(cls.name_one, cls.get_date_time_now())
+        with closing(TimeDatabase(test_db_name, cls.log)) as db:
+            db.insert_started_work(cls.name_one, cls.get_date_time_now())
 
     def test_creation(self):
         expected_tables = ('work_times')
         sql_cmd = 'select name from sqlite_master WHERE TYPE =\'table\''
+        self.db = TimeDatabase(test_db_name, self.log)
         cursor = self.db.connection.cursor()
         tables = []
         for table in cursor.execute(sql_cmd):
@@ -53,6 +56,7 @@ class TestDatabase(unittest.TestCase):
 
     def test_insert_started_work(self):
         sql_cmd = 'select name from work_times'
+        self.db = TimeDatabase(test_db_name, self.log)
         cursor = self.db.connection.cursor()
         cursor.execute(sql_cmd)
         row = cursor.fetchone()
@@ -63,6 +67,7 @@ class TestDatabase(unittest.TestCase):
         start = self.get_date_time(2000, 10, 10, 12, 10)
         end = self.get_date_time(2000, 10, 10, 13, 10)
 
+        self.db = TimeDatabase(test_db_name, self.log)
         self.db.insert_started_work(name, start)
         self.db.insert_finished_work(name, end)
 
@@ -78,9 +83,10 @@ class TestDatabase(unittest.TestCase):
 
     def test_start_exists(self):
         name = 'Baz'
-        self.assertFalse(self.db.start_exists(name))
-        self.db.insert_started_work(name, self.get_date_time_now())
-        self.assertTrue(self.db.start_exists(name))
+        with closing(TimeDatabase(test_db_name, self.log)) as db:
+            self.assertFalse(db.start_exists(name))
+            db.insert_started_work(name, self.get_date_time_now())
+            self.assertTrue(db.start_exists(name))
 
 
 if __name__ == '__main__':

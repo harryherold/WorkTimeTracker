@@ -2,6 +2,7 @@
 import sys
 import os.path
 import argparse
+from contextlib import closing
 
 from time_database import TimeDatabase
 from utils import *
@@ -14,32 +15,31 @@ class TimeTracker:
         self.verbose = verbose
         self.filename = filename
         database_exists = os.path.exists(self.filename)
-        self.database = TimeDatabase(self.filename, self.logger, verbose=self.verbose)
         if not database_exists:
-            self.database.create_tables()
-            self.logger.info("Database created\n", self.verbose)
+            with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
+                db.create_tables()
+                self.logger.info("Database created\n", self.verbose)
         self.logger.info("Connected to database {}".format(self.filename), self.verbose)
 
-    def __del__(self):
-        # TODO database.close in destructor is a bad idea -> throws an exception
-        self.database.close()
-
     def start_activity(self, name: str, t: TimeStamp) -> None:
-        if self.database.start_exists(name):
-            self.logger.warning("This activity is already started")
-            return
-        self.database.insert_started_work(name, t)
+        with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
+            if db.start_exists(name):
+                self.logger.warning("This activity is already started")
+                return
+            db.insert_started_work(name, t)
 
     def end_activity(self, name: str, t: TimeStamp) -> None:
-        if not self.database.start_exists(name):
-            self.logger.warning("This activity is not started")
-            return
-        self.database.insert_finished_work(name, t)
+        with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
+            if not db.start_exists(name):
+                self.logger.warning("This activity is not started")
+                return
+            db.insert_finished_work(name, t)
 
     def show_started_work(self) -> None:
-        started_work = self.database.get_started_work()
-        for e in started_work:
-            self.logger.print("{} => {}".format(e[0], e[1]))
+        with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
+            started_work = db.get_started_work()
+            for e in started_work:
+                self.logger.print("{} => {}".format(e[0], e[1]))
 
 parser = argparse.ArgumentParser()
 
@@ -67,7 +67,7 @@ logger = Logger(args.logfile)
 tt = TimeTracker(db_path, logger, verbose=args.verbose)
 
 if args.list:
-    tt.show_started_work()
+    #tt.show_started_work()
     exit(0)
 
 if args.start is not None:
