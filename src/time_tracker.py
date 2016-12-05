@@ -37,9 +37,11 @@ class TimeTracker:
 
     def show_started_work(self) -> None:
         with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
-            started_work = db.get_started_work()
-            for e in started_work:
-                self.logger.print("{} => {}".format(e[0], e[1]))
+            started_work = db.get_started_activities()
+            if started_work:
+                self.logger.print(','.join(started_work))
+            else:
+                self.logger.print('No activity')
 
 parser = argparse.ArgumentParser()
 
@@ -67,7 +69,7 @@ logger = Logger(args.logfile)
 tt = TimeTracker(db_path, logger, verbose=args.verbose)
 
 if args.list:
-    #tt.show_started_work()
+    tt.show_started_work()
     exit(0)
 
 if args.start is not None:

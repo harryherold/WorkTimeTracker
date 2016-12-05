@@ -56,16 +56,21 @@ class TimeDatabase:
         else:
             self.log.info("Stored in database", self.verbose)
 
-    def get_started_work(self) -> List[List[str]]:
+    def get_started_activities(self) -> List[str]:
         """Returns a structure that includes all started activities with time"""
 
         search_cmd = 'select start, name from work_times where end is NULL'
         cursor = self.connection.cursor()
-        cursor.execute(search_cmd)
+        try:
+            cursor.execute(search_cmd)
+        except sqlite3.Error as err:
+            self.log.error("Cannot select started activities in database")
+            self.log.error("{}".format(err.args[0]))
+        else:
+            self.log.info("Selected entries in database")
+
         rows = cursor.fetchall()
-        started_work = []
-        for row in rows:
-            started_work.append([row[0], row[1]])
+        started_work = [row[1] for row in rows]
         return started_work
 
     def start_exists(self, name: str) -> bool:
