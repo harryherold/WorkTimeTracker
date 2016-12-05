@@ -44,6 +44,9 @@ class Logger:
     def error(self, mesg: str, is_active=True) -> None:
         print(mesg, file=self.out)
 
+# TODO Implement subraction of time stamps
+def sub_timestamps(t1: TimeStamp, t2: TimeStamp) -> TimeStamp:
+    pass
 
 class TimeStamp:
 

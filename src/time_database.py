@@ -67,7 +67,7 @@ class TimeDatabase:
             self.log.error("Cannot select started activities in database")
             self.log.error("{}".format(err.args[0]))
         else:
-            self.log.info("Selected entries in database")
+            self.log.info("Selected entries in database", self.verbose)
 
         rows = cursor.fetchall()
         started_work = [row[1] for row in rows]
@@ -76,9 +76,26 @@ class TimeDatabase:
     def start_exists(self, name: str) -> bool:
         """Tests whether a start timestamp exists for an activity"""
 
-        search_cmd = 'select exists(select 1 from work_times where end is NULL and name = ? limit 1)'
+        select_cmd = 'select exists(select 1 from work_times where end is NULL and name = ? limit 1)'
         cursor = self.connection.cursor()
-        cursor.execute(search_cmd, (name,))
+        cursor.execute(select_cmd, (name,))
         row = cursor.fetchone()
 
         return True if row[0] == 1 else False
+
+    def get_time_of_started_activity(self, name: str) -> TimeStamp:
+        """Returns the timestamp of given and started activity"""
+
+        select_cmd = 'select start from work_times where end is NULL and name = ? limit 1'
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(select_cmd, (name,))
+        except sqlite3.Error as err:
+            self.log.error("Cannot select time of started activities in database")
+            self.log.error("{}".format(err.args[0]))
+        else:
+            self.log.info("Selected time of started activity in database", self.verbose)
+
+        row = cursor.fetchone()
+
+        return TimeStamp(row[0])

@@ -43,6 +43,15 @@ class TimeTracker:
             else:
                 self.logger.print('No activity')
 
+    def show_duration_of_activity(self, activity) -> None:
+        with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
+            if not db.start_exists(activity):
+                self.logger.warning("This activity is not started")
+                return
+            # TODO Add subtraction of timestamps and printing its difference
+            print(db.get_time_of_started_activity(activity))
+
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-s", "--start", type=str,
@@ -53,6 +62,9 @@ parser.add_argument("-e", "--end", type=str,
 
 parser.add_argument("-a","--activity", type=str,
                     help="The activity name")
+
+parser.add_argument("-d","--duration", action='store_true',
+                    help="Shows all started activities.")
 
 parser.add_argument("--logfile", type=str,
                     help="Specifies a log file for the output."
@@ -71,6 +83,12 @@ tt = TimeTracker(db_path, logger, verbose=args.verbose)
 if args.list:
     tt.show_started_work()
     exit(0)
+
+if args.duration:
+    if args.activity is None:
+        logger.warning("Activity not given to show the current duration!")
+        exit(1)
+    tt.show_duration_of_activity(args.activity)
 
 if args.start is not None:
     if args.activity is None:
