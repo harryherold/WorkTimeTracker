@@ -73,8 +73,9 @@ class TimeDatabase:
         started_work = [row[1] for row in rows]
         return started_work
 
+    # TODO rename method, the name is misleading
     def start_exists(self, name: str) -> bool:
-        """Tests whether a start timestamp exists for an activity"""
+        """Tests whether a start timestamp exists for an activity and no end timestamp"""
 
         select_cmd = 'select exists(select 1 from work_times where end is NULL and name = ? limit 1)'
         cursor = self.connection.cursor()
@@ -99,3 +100,8 @@ class TimeDatabase:
         row = cursor.fetchone()
 
         return TimeStamp(row[0])
+
+    def get_time_of_activity(self, name: str, begin: TimeStamp, end: TimeStamp):
+        """Return the duration that an activity took as a tuple of (day, hour, minute)"""
+
+        return (0, 0, 0)
