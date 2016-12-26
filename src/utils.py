@@ -44,10 +44,6 @@ class Logger:
     def error(self, mesg: str, is_active=True) -> None:
         print(mesg, file=self.out)
 
-# TODO Implement subraction of time stamps
-def sub_timestamps(t1: TimeStamp, t2: TimeStamp) -> TimeStamp:
-    pass
-
 class TimeStamp:
 
     def __init__(self, time_string):
@@ -61,6 +57,9 @@ class TimeStamp:
                 self.date_time = datetime.strptime(time_string, self.format)
             except ValueError:
                 raise
+
+    def datetime(self):
+        return self.date_time
 
     def __str__(self):
         return self.date_time.strftime(self.format)
@@ -82,3 +81,41 @@ class TimeStamp:
 
     def minute(self) -> int:
         return self.date_time.minute
+
+# TODO Implement subraction of time stamps
+def sub_timestamps(t1: TimeStamp, t2: TimeStamp):
+    """Returns a tuple(days,hours,mins) for the difference between two timestamps"""
+
+    diff = t2.datetime() - t1.datetime()
+    days = diff.days
+    hours = int(diff.seconds / 3600)
+    mins = int((diff.seconds - (hours * 3600)) / 60)
+    return (days, hours, mins)
+
+# TODO Implement TimeInterval class
+class TimeInterval:
+    def __init__(self,begin: TimeStamp, end: TimeStamp):
+        if begin.date_time > end.date_time:
+            raise ValueError('Start ({}) must not be greater than end ({})'.format(begin, end))
+        self.begin = begin
+        self.end = end
+
+    def intersects(self, other):
+        if self < other or other < self:
+            return False
+        if self <= other or other <= self:
+            return True
+        if self.contains(other) or other.contains(self):
+            return True
+
+    def __lt__(self, other):
+        return self.begin.date_time < other.begin.date_time and self.end.date_time < other.begin.date_time
+
+    def __le__(self, other):
+        return self.begin.date_time < other.begin.date_time     \
+                and self.end.date_time >= other.begin.date_time \
+                and self.end.date_time <= other.end.date_time
+
+    def contains(self, other):
+        return self.begin.date_time <= other.begin.date_time \
+               and other.end.date_time <= self.end.date_time
