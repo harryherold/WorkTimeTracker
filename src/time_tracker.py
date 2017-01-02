@@ -46,6 +46,7 @@ class TimeTracker:
 
     def show_duration_of_activity(self, activity, duration) -> None:
         try:
+            # TODO exlude tabs, whitespaces and newlines
             [b, e] = [TimeStamp(t) for t in duration.split(',')]
         except ValueError:
             self.logger.error('Given time interval has the wrong format')
@@ -53,12 +54,11 @@ class TimeTracker:
         with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
             d = h = m = 0
             if db.start_exists(activity):
-                start_time = get_time_of_started_activity(activity)
+                start_time = db.get_time_of_started_activity(activity)
                 current_time = TimeStamp('c')
                 activity_interval = TimeInterval(start_time, current_time)
                 request_interval = TimeInterval(b, e)
                 (d, h, m) = request_interval.intersection(activity_interval)
-
             (d, h, m) = tuple(map(operator.add,
                                   db.get_time_of_activity(activity, b, e),
                                   (d, h, m)))
