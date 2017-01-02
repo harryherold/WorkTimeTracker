@@ -2,6 +2,7 @@
 import sys
 import os.path
 import argparse
+import operator
 from contextlib import closing
 
 from time_database import TimeDatabase
@@ -43,13 +44,27 @@ class TimeTracker:
             else:
                 self.logger.print('No activity')
 
-    def show_duration_of_activity(self, activity) -> None:
+    def show_duration_of_activity(self, activity, duration) -> None:
+        try:
+            [b, e] = [TimeStamp(t) for t in duration.split(',')]
+        except ValueError:
+            self.logger.error('Given time interval has the wrong format')
+            return
         with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
-            if not db.start_exists(activity):
-                self.logger.warning("This activity is not started")
-                return
-            # TODO Add subtraction of timestamps and printing its difference
-            print(db.get_time_of_started_activity(activity))
+            d = h = m = 0
+            if db.start_exists(activity):
+                start_time = get_time_of_started_activity(activity)
+                current_time = TimeStamp('c')
+                activity_interval = TimeInterval(start_time, current_time)
+                request_interval = TimeInterval(b, e)
+                (d, h, m) = request_interval.intersection(activity_interval)
+
+            (d, h, m) = tuple(map(operator.add,
+                                  db.get_time_of_activity(activity, b, e),
+                                  (d, h, m)))
+            self.logger.print('{:02d}:{:02d}:{:02d}'.format(d,h,m))
+
+
 
 
 parser = argparse.ArgumentParser()
@@ -63,8 +78,8 @@ parser.add_argument("-e", "--end", type=str,
 parser.add_argument("-a","--activity", type=str,
                     help="The activity name")
 
-parser.add_argument("-d","--duration", action='store_true',
-                    help="Shows all started activities.")
+parser.add_argument("-d","--duration", type=str,
+                    help="Shows the duration of an interval for a given specific activity.")
 
 parser.add_argument("--logfile", type=str,
                     help="Specifies a log file for the output."
@@ -88,7 +103,7 @@ if args.duration:
     if args.activity is None:
         logger.warning("Activity not given to show the current duration!")
         exit(1)
-    tt.show_duration_of_activity(args.activity)
+    tt.show_duration_of_activity(args.activity, args.duration)
 
 if args.start is not None:
     if args.activity is None:
