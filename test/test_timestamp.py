@@ -6,7 +6,6 @@ os.sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "
 
 from utils import TimeStamp
 
-
 class TestTimeStamp(unittest.TestCase):
     def test_current_date(self):
         current_t = datetime.now()
@@ -29,6 +28,13 @@ class TestTimeStamp(unittest.TestCase):
             TimeStamp("2001-10")
         with self.assertRaises(ValueError):
             TimeStamp("c-10")
+
+    def test_sub_timestamps(self):
+        ts = TimeStamp("1.12.2010-08:00")
+        te = TimeStamp("2.12.2010-09:01")
+        self.assertEqual((1, 1, 1), te - ts)
+        te = TimeStamp("31.12.2010-10:02")
+        self.assertEqual((30, 2, 2), te - ts)
 
 if __name__ == '__main__':
     unittest.main()
