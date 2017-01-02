@@ -82,15 +82,14 @@ class TimeStamp:
     def minute(self) -> int:
         return self.date_time.minute
 
-# TODO Implement subraction of time stamps
-def sub_timestamps(t1: TimeStamp, t2: TimeStamp):
-    """Returns a tuple(days,hours,mins) for the difference between two timestamps"""
+    def __sub__(self, other):
+        """Returns a tuple(days,hours,mins) for the difference between two timestamps"""
+        diff = self.datetime() - other.datetime()
+        days = diff.days
+        hours = int(diff.seconds / 3600)
+        mins = int((diff.seconds - (hours * 3600)) / 60)
+        return (days, hours, mins)
 
-    diff = t2.datetime() - t1.datetime()
-    days = diff.days
-    hours = int(diff.seconds / 3600)
-    mins = int((diff.seconds - (hours * 3600)) / 60)
-    return (days, hours, mins)
 
 # TODO Implement TimeInterval class
 class TimeInterval:
