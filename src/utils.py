@@ -99,22 +99,41 @@ class TimeInterval:
         self.begin = begin
         self.end = end
 
-    def intersects(self, other):
-        if self < other or other < self:
-            return False
-        if self <= other or other <= self:
-            return True
-        if self.contains(other) or other.contains(self):
-            return True
-
     def __lt__(self, other):
         return self.begin.date_time < other.begin.date_time and self.end.date_time < other.begin.date_time
+
+    def __gt__(self, other):
+        return other < self
 
     def __le__(self, other):
         return self.begin.date_time < other.begin.date_time     \
                 and self.end.date_time >= other.begin.date_time \
                 and self.end.date_time <= other.end.date_time
 
+    def __ge__(self, other):
+        return other <= self
+
     def contains(self, other):
         return self.begin.date_time <= other.begin.date_time \
                and other.end.date_time <= self.end.date_time
+
+    def disjunct(self, other):
+        return self < other or self > other
+
+    def overlapps(self, other):
+        return self <= other or self >= other
+
+    def intersection(self, other):
+        """Returns the intersecting time as tuple (days, hours, mins)"""
+        if self.overlapps(other):
+            if self <= other:
+                return  self.end - other.begin
+            else:
+                return  other.end - self.begin
+        elif self.contains(other):
+            return other.end - other.begin
+        elif other.contains(self):
+            return self.end - self.begin
+        else:
+            # Disjunct time intervals
+            return (0, 0, 0)
