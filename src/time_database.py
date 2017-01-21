@@ -1,7 +1,7 @@
 import sqlite3
 from typing import List
 from utils import *
-
+import operator
 
 class TimeDatabase:
     def __init__(self, filename: str, log: Logger, verbose=False):
@@ -99,9 +99,37 @@ class TimeDatabase:
 
         row = cursor.fetchone()
 
-        return TimeStamp(row[0])
+        return TimeStamp(db_string=row[0])
 
-    def get_time_of_activity(self, name: str, begin: TimeStamp, end: TimeStamp):
-        """Return the duration that an activity took as a tuple of (day, hour, minute)"""
+    def get_time_of_activity(self, name: str, interval: TimeInterval):
+        """Returns the duration that a completed activity took as a tuple of (day, hour, minute)"""
 
-        return (0, 0, 0)
+        select_cmd = 'select start, end from work_times where name = ? and \
+                      ((start between ? and ?) or (end between ? and ?))'
+
+        cursor = self.connection.cursor()
+
+        try:
+            cursor.execute(select_cmd, (name,                       \
+                                        interval.begin.db_string(), \
+                                        interval.end.db_string(),   \
+                                        interval.begin.db_string(), \
+                                        interval.end.db_string()))
+        except sqlite3.Error as err:
+            self.log.error("Cannot select times completed activities in database")
+            self.log.error("{}".format(err.args[0]))
+        else:
+            self.log.info("Selected times completed activities in database", self.verbose)
+
+        rows = cursor.fetchall()
+
+        d = h = m = 0
+
+        for row in rows:
+            b = TimeStamp(db_string=row[0])
+            e = TimeStamp(db_string=row[1])
+            (d, h, m) = tuple(map(operator.add,                              \
+                                  TimeInterval(b, e).intersection(interval), \
+                                  (d, h, m)))
+
+        return (d, h, m)
