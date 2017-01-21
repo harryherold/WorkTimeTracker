@@ -33,7 +33,7 @@ class TimeDatabase:
         insert_cmd = 'insert into work_times (start, name) values (?, ?)'
         cursor = self.connection.cursor()
         try:
-            cursor.execute(insert_cmd, (str(date), name))
+            cursor.execute(insert_cmd, (date.db_string(), name))
             self.connection.commit()
         except sqlite3.Error as err:
             self.log.error("Cannot store starting time in database")
@@ -48,7 +48,7 @@ class TimeDatabase:
                      'where end is NULL and name = ?'
         cursor = self.connection.cursor()
         try:
-            cursor.execute(update_cmd, (str(date), str(date), name))
+            cursor.execute(update_cmd, (date.db_string(), date.db_string(), name))
             self.connection.commit()
         except sqlite3.Error as err:
             self.log.error("Cannot store ending time in database")

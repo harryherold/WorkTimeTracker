@@ -61,6 +61,9 @@ class TimeStamp:
     def datetime(self):
         return self.date_time
 
+    def db_string(self):
+        return self.date_time.strftime("%Y-%m-%d %H:%M")
+
     def __str__(self):
         return self.date_time.strftime(self.format)
 
