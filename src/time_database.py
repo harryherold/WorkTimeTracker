@@ -19,14 +19,20 @@ class TimeDatabase:
         """Creates database and tables"""
 
         cursor = self.connection.cursor()
-        # TODO Throws an execption
-        cursor.execute('CREATE TABLE work_times (id integer,       \
-                                                 start DATETIME, \
-                                                 end DATETIME,   \
-                                                 name text,      \
-                                                 diff real,   \
-                                                 primary key(id))')
-        self.connection.commit()
+
+        try:
+            cursor.execute('CREATE TABLE work_times (id integer,       \
+                                                     start DATETIME, \
+                                                     end DATETIME,   \
+                                                     name text,      \
+                                                     diff real,   \
+                                                     primary key(id))')
+            self.connection.commit()
+        except sqlite3.Error as err:
+            self.log.error("Cannot create database")
+            self.log.error("{}".format(err.args[0]))
+        else:
+            self.log.info("Created database", self.verbose)
 
     def insert_started_work(self, name: str, date: TimeStamp) -> None:
 
