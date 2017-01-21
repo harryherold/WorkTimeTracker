@@ -6,7 +6,6 @@ def always_active(f):
         return f(self, mesg, is_active=True)
     return _always_active
 
-
 def prepend_tag(tag):
     def _prepend_tag(f):
         def wrapper(self, mesg: str, is_active=True):
@@ -14,7 +13,6 @@ def prepend_tag(tag):
                 return f(self, "{0:12s}: {1}".format('['+tag+']', mesg))
         return wrapper
     return _prepend_tag
-
 
 class Logger:
 
@@ -46,26 +44,37 @@ class Logger:
 
 class TimeStamp:
 
-    def __init__(self, time_string):
-        self.format = "%d.%m.%Y-%H:%M"
+    def __init__(self, user_string=None, db_string=None):
+        self.user_format = "%d.%m.%Y-%H:%M"
+        self.db_format = "%Y-%m-%d %H:%M"
         self.date_time = None
-        # TODO string processing in separate unit
-        if 'c' == time_string:
-            self.date_time = datetime.now()
-        else:
+
+        if db_string:
+            self.date_time = datetime.strptime(db_string, self.db_format)
+        elif user_string and TimeStamp.time_conforms_format(user_string, self.user_format):
             try:
-                self.date_time = datetime.strptime(time_string, self.format)
+                self.date_time = datetime.strptime(user_string, self.user_format)
             except ValueError:
                 raise
+        else:
+            self.date_time = datetime.now()
+
+    @staticmethod
+    def time_conforms_format(time_string, time_format):
+        try:
+            datetime.strptime(time_string, time_format)
+        except ValueError:
+            return False
+        return True
 
     def datetime(self):
         return self.date_time
 
     def db_string(self):
-        return self.date_time.strftime("%Y-%m-%d %H:%M")
+        return self.date_time.strftime(self.db_format)
 
     def __str__(self):
-        return self.date_time.strftime(self.format)
+        return self.date_time.strftime(self.user_format)
 
     def __repr__(self):
         return self.__str__()
@@ -93,8 +102,6 @@ class TimeStamp:
         mins = int((diff.seconds - (hours * 3600)) / 60)
         return (days, hours, mins)
 
-
-# TODO Implement TimeInterval class
 class TimeInterval:
     def __init__(self,begin: TimeStamp, end: TimeStamp):
         if begin.date_time > end.date_time:

@@ -47,25 +47,32 @@ class TimeTracker:
     def show_duration_of_activity(self, activity, duration) -> None:
         try:
             # TODO exlude tabs, whitespaces and newlines
-            [b, e] = [TimeStamp(t) for t in duration.split(',')]
+            [b, e] = [TimeStamp(user_string=t) for t in duration.split(',')]
+            requested_interval = TimeInterval(b, e)
         except ValueError:
             self.logger.error('Given time interval has the wrong format')
             return
         with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
             d = h = m = 0
-            if db.start_exists(activity):
-                start_time = db.get_time_of_started_activity(activity)
-                current_time = TimeStamp('c')
-                activity_interval = TimeInterval(start_time, current_time)
-                request_interval = TimeInterval(b, e)
-                (d, h, m) = request_interval.intersection(activity_interval)
-            (d, h, m) = tuple(map(operator.add,
-                                  db.get_time_of_activity(activity, b, e),
-                                  (d, h, m)))
-            self.logger.print('{:02d}:{:02d}:{:02d}'.format(d,h,m))
+            (d, h, m) = db.get_time_of_activity(activity, requested_interval)
+            self.logger.print('{:02d}:{:02d}:{:02d}'.format(d, h, m))
+            # if db.start_exists(activity):
+            #     start_time = db.get_time_of_started_activity(activity)
+            #     current_time = TimeStamp('c')
+            #     activity_interval = TimeInterval(start_time, current_time)
+            #     request_interval = TimeInterval(b, e)
+            #     (d, h, m) = request_interval.intersection(activity_interval)
+            # (d, h, m) = tuple(map(operator.add,
+            #                       db.get_time_of_activity(activity, b, e),
+            #                       (d, h, m)))
+            # self.logger.print('{:02d}:{:02d}:{:02d}'.format(d,h,m))
 
 
-
+def parse_time_string(time_str: str) -> TimeStamp:
+    if time_str == 'c':
+        return TimeStamp()
+    else:
+        return TimeStamp(user_string=time_str)
 
 parser = argparse.ArgumentParser()
 
@@ -109,10 +116,10 @@ if args.start is not None:
     if args.activity is None:
         logger.warning("Activity not given! Can not store start of work time")
         exit(1)
-    tt.start_activity(args.activity, TimeStamp(args.start))
+    tt.start_activity(args.activity, parse_time_string(args.start))
 
 if args.end is not None:
     if args.activity is None:
         logger.warning("Activity not given! Can not store end of work time")
         exit(1)
-    tt.end_activity(args.activity, TimeStamp(args.end))
+    tt.end_activity(args.activity, parse_time_string(args.end))
