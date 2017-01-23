@@ -6,6 +6,7 @@ import operator
 class TimeDatabase:
     def __init__(self, filename: str, log: Logger, verbose=False):
         """Connects to the database"""
+        
         self.log = log
         self.verbose = verbose
         self.filename = filename
@@ -13,19 +14,19 @@ class TimeDatabase:
 
     def close(self) -> None:
         """Disconnect the database"""
+        
         self.connection.close()
 
     def create_tables(self) -> None:
         """Creates database and tables"""
 
         cursor = self.connection.cursor()
-
         try:
-            cursor.execute('CREATE TABLE work_times (id integer,       \
+            cursor.execute('CREATE TABLE work_times (id integer,     \
                                                      start DATETIME, \
                                                      end DATETIME,   \
                                                      name text,      \
-                                                     diff real,   \
+                                                     diff real,      \
                                                      primary key(id))')
             self.connection.commit()
         except sqlite3.Error as err:
@@ -35,7 +36,8 @@ class TimeDatabase:
             self.log.info("Created database", self.verbose)
 
     def insert_started_work(self, name: str, date: TimeStamp) -> None:
-
+		"""Stores the starting of an activity"""
+		
         insert_cmd = 'insert into work_times (start, name) values (?, ?)'
         cursor = self.connection.cursor()
         try:
@@ -48,7 +50,9 @@ class TimeDatabase:
             self.log.info("Stored in database", self.verbose)
 
     def insert_finished_work(self, name: str, date: TimeStamp) -> None:
-
+		"""Stores the timestamp of the end of the activity"""
+		"""This requires that the activity was started before"""
+		
         update_cmd = 'update work_times set end = ?, ' \
                      'diff = cast(strftime(\'%s\', ?)- strftime(\'%s\',start) as REAL) / 60 / 60 ' \
                      'where end is NULL and name = ?'
@@ -74,7 +78,6 @@ class TimeDatabase:
             self.log.error("{}".format(err.args[0]))
         else:
             self.log.info("Selected entries in database", self.verbose)
-
         rows = cursor.fetchall()
         started_work = [row[1] for row in rows]
         return started_work
@@ -87,10 +90,10 @@ class TimeDatabase:
         cursor = self.connection.cursor()
         cursor.execute(select_cmd, (name,))
         row = cursor.fetchone()
-
         return True if row[0] == 1 else False
 
-    def get_time_of_started_activity(self, name: str) -> TimeStamp:
+	# TODO test case is missing
+    def get_start_time_of_activity(self, name: str) -> TimeStamp:
         """Returns the timestamp of given and started activity"""
 
         select_cmd = 'select start from work_times where end is NULL and name = ? limit 1'
@@ -102,12 +105,11 @@ class TimeDatabase:
             self.log.error("{}".format(err.args[0]))
         else:
             self.log.info("Selected time of started activity in database", self.verbose)
-
         row = cursor.fetchone()
-
         return TimeStamp(db_string=row[0])
 
-    def get_time_of_activity(self, name: str, interval: TimeInterval):
+	# TODO test case is missing
+    def get_duration_of_activity(self, name: str, interval: TimeInterval):
         """Returns the duration that a completed activity took as a tuple of (day, hour, minute)"""
 
         select_cmd = 'select start, end from work_times where name = ? and \
@@ -126,16 +128,12 @@ class TimeDatabase:
             self.log.error("{}".format(err.args[0]))
         else:
             self.log.info("Selected times completed activities in database", self.verbose)
-
         rows = cursor.fetchall()
-
         d = h = m = 0
-
         for row in rows:
             b = TimeStamp(db_string=row[0])
             e = TimeStamp(db_string=row[1])
             (d, h, m) = tuple(map(operator.add,                              \
                                   TimeInterval(b, e).intersection(interval), \
                                   (d, h, m)))
-
         return (d, h, m)

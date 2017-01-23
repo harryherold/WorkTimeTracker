@@ -9,7 +9,7 @@ from time_database import TimeDatabase
 from utils import *
 from config import *
 
-
+# TODO Put this class in separate module 
 class TimeTracker:
     def __init__(self, filename: str, logger: Logger, verbose=False):
         self.logger = logger
@@ -54,10 +54,10 @@ class TimeTracker:
             return
         with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
             d = h = m = 0
-            (d, h, m) = db.get_time_of_activity(activity, requested_interval)
+            (d, h, m) = db.get_duration_of_activity(activity, requested_interval)
             self.logger.print('{:02d}:{:02d}:{:02d}'.format(d, h, m))
             # if db.start_exists(activity):
-            #     start_time = db.get_time_of_started_activity(activity)
+            #     start_time = db.get_start_time_of_activity(activity)
             #     current_time = TimeStamp('c')
             #     activity_interval = TimeInterval(start_time, current_time)
             #     request_interval = TimeInterval(b, e)
