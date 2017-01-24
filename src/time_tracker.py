@@ -9,7 +9,7 @@ from time_database import TimeDatabase
 from utils import *
 from config import *
 
-# TODO Put this class in separate module 
+# TODO Put this class in separate module
 class TimeTracker:
     def __init__(self, filename: str, logger: Logger, verbose=False):
         self.logger = logger
@@ -46,8 +46,7 @@ class TimeTracker:
 
     def show_duration_of_activity(self, activity, duration) -> None:
         try:
-            # TODO exlude tabs, whitespaces and newlines
-            [b, e] = [TimeStamp(user_string=t) for t in duration.split(',')]
+            [b, e] = [TimeStamp(user_string=t) for t in duration.strip().split(',')]
             requested_interval = TimeInterval(b, e)
         except ValueError:
             self.logger.error('Given time interval has the wrong format')
@@ -55,18 +54,7 @@ class TimeTracker:
         with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
             d = h = m = 0
             (d, h, m) = db.get_duration_of_activity(activity, requested_interval)
-            self.logger.print('{:02d}:{:02d}:{:02d}'.format(d, h, m))
-            # if db.start_exists(activity):
-            #     start_time = db.get_start_time_of_activity(activity)
-            #     current_time = TimeStamp('c')
-            #     activity_interval = TimeInterval(start_time, current_time)
-            #     request_interval = TimeInterval(b, e)
-            #     (d, h, m) = request_interval.intersection(activity_interval)
-            # (d, h, m) = tuple(map(operator.add,
-            #                       db.get_time_of_activity(activity, b, e),
-            #                       (d, h, m)))
-            # self.logger.print('{:02d}:{:02d}:{:02d}'.format(d,h,m))
-
+            self.logger.print('{:02d}:{:02d}:{:02d}'.format(d,h,m))
 
 def parse_time_string(time_str: str) -> TimeStamp:
     if time_str == 'c':

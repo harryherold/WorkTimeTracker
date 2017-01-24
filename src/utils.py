@@ -109,6 +109,8 @@ class TimeInterval:
         self.begin = begin
         self.end = end
 
+    def __str__(self):
+            return "[{}, {}]".format(self.begin, self.end)
     def __lt__(self, other):
         return self.begin.date_time < other.begin.date_time and self.end.date_time < other.begin.date_time
 

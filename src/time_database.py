@@ -6,7 +6,7 @@ import operator
 class TimeDatabase:
     def __init__(self, filename: str, log: Logger, verbose=False):
         """Connects to the database"""
-        
+
         self.log = log
         self.verbose = verbose
         self.filename = filename
@@ -14,7 +14,7 @@ class TimeDatabase:
 
     def close(self) -> None:
         """Disconnect the database"""
-        
+
         self.connection.close()
 
     def create_tables(self) -> None:
@@ -36,8 +36,8 @@ class TimeDatabase:
             self.log.info("Created database", self.verbose)
 
     def insert_started_work(self, name: str, date: TimeStamp) -> None:
-		"""Stores the starting of an activity"""
-		
+        """Stores the starting of an activity"""
+
         insert_cmd = 'insert into work_times (start, name) values (?, ?)'
         cursor = self.connection.cursor()
         try:
@@ -50,9 +50,9 @@ class TimeDatabase:
             self.log.info("Stored in database", self.verbose)
 
     def insert_finished_work(self, name: str, date: TimeStamp) -> None:
-		"""Stores the timestamp of the end of the activity"""
-		"""This requires that the activity was started before"""
-		
+        """Stores the timestamp of the end of the activity"""
+        """This requires that the activity was started before"""
+
         update_cmd = 'update work_times set end = ?, ' \
                      'diff = cast(strftime(\'%s\', ?)- strftime(\'%s\',start) as REAL) / 60 / 60 ' \
                      'where end is NULL and name = ?'
