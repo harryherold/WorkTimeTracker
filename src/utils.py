@@ -135,6 +135,7 @@ class TimeInterval:
     def overlapps(self, other):
         return self <= other or self >= other
 
+    # TODO Use time delta type
     def intersection(self, other):
         """Returns the intersecting time as tuple (days, hours, mins)"""
         if self.overlapps(other):

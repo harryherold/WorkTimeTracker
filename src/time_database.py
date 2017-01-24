@@ -129,6 +129,7 @@ class TimeDatabase:
         else:
             self.log.info("Selected times completed activities in database", self.verbose)
         rows = cursor.fetchall()
+        # TODO Use time delta type
         d = h = m = 0
         for row in rows:
             b = TimeStamp(db_string=row[0])
