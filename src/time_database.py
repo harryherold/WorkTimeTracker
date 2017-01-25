@@ -2,6 +2,7 @@ import sqlite3
 from typing import List
 from utils import *
 import operator
+import datetime
 
 class TimeDatabase:
     def __init__(self, filename: str, log: Logger, verbose=False):
@@ -129,12 +130,9 @@ class TimeDatabase:
         else:
             self.log.info("Selected times completed activities in database", self.verbose)
         rows = cursor.fetchall()
-        # TODO Use time delta type
-        d = h = m = 0
+        duration = datetime.timedelta(days=0, seconds=0)
         for row in rows:
             b = TimeStamp(db_string=row[0])
             e = TimeStamp(db_string=row[1])
-            (d, h, m) = tuple(map(operator.add,                              \
-                                  TimeInterval(b, e).intersection(interval), \
-                                  (d, h, m)))
-        return (d, h, m)
+            duration += TimeInterval(b, e).intersection(interval)
+        return duration

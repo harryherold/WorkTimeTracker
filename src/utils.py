@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timedelta
 
 
 def always_active(f):
@@ -95,12 +96,7 @@ class TimeStamp:
         return self.date_time.minute
 
     def __sub__(self, other):
-        """Returns a tuple(days,hours,mins) for the difference between two timestamps"""
-        diff = self.datetime() - other.datetime()
-        days = diff.days
-        hours = int(diff.seconds / 3600)
-        mins = int((diff.seconds - (hours * 3600)) / 60)
-        return (days, hours, mins)
+        return self.datetime() - other.datetime()
 
 class TimeInterval:
     def __init__(self,begin: TimeStamp, end: TimeStamp):
@@ -135,9 +131,8 @@ class TimeInterval:
     def overlapps(self, other):
         return self <= other or self >= other
 
-    # TODO Use time delta type
     def intersection(self, other):
-        """Returns the intersecting time as tuple (days, hours, mins)"""
+        """Returns the intersecting time as datetime.timedelta"""
         if self.overlapps(other):
             if self <= other:
                 return  self.end - other.begin
@@ -148,5 +143,4 @@ class TimeInterval:
         elif other.contains(self):
             return self.end - self.begin
         else:
-            # Disjunct time intervals
-            return (0, 0, 0)
+            return timedelta(days=0, seconds=0)

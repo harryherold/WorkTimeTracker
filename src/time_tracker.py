@@ -47,6 +47,7 @@ class TimeTracker:
             self.logger.error('Given time interval has the wrong format')
             return
         with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
-            d = h = m = 0
-            (d, h, m) = db.get_duration_of_activity(activity, requested_interval)
-            self.logger.print('{:02d}:{:02d}:{:02d}'.format(d,h,m))
+            d = db.get_duration_of_activity(activity, requested_interval)
+            hours = int(d.seconds / 3600)
+            minutes = int((d.seconds - (hours * 3600)) / 60)
+            self.logger.print('{:02d}:{:02d}:{:02d}'.format(d.days, hours, minutes))
