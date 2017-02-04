@@ -45,18 +45,23 @@ class Logger:
 
 class TimeStamp:
 
-    def __init__(self, user_string=None, db_string=None):
+    def __init__(self, user_string=None, db_string=None, date_time=None):
         self.user_format = "%d.%m.%Y-%H:%M"
         self.db_format = "%Y-%m-%d %H:%M"
         self.date_time = None
 
-        if db_string:
-            self.date_time = datetime.strptime(db_string, self.db_format)
-        elif user_string and TimeStamp.time_conforms_format(user_string, self.user_format):
+        if date_time:
+           self.date_time = date_time
+        elif db_string:
+            try:
+                self.date_time = datetime.strptime(db_string, self.db_format)
+            except ValueError:
+                raise ValueError
+        elif user_string:
             try:
                 self.date_time = datetime.strptime(user_string, self.user_format)
             except ValueError:
-                raise
+                raise ValueError
         else:
             self.date_time = datetime.now()
 
@@ -67,6 +72,10 @@ class TimeStamp:
         except ValueError:
             return False
         return True
+
+    @staticmethod
+    def now():
+        return TimeStamp(date_time=datetime.now())
 
     def datetime(self):
         return self.date_time
@@ -97,6 +106,9 @@ class TimeStamp:
 
     def __sub__(self, other):
         return self.datetime() - other.datetime()
+
+    def __eq__(self, other):
+        return self.datetime() == other.datetime()
 
 class TimeInterval:
     def __init__(self,begin: TimeStamp, end: TimeStamp):
