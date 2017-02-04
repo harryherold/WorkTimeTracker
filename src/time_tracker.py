@@ -5,6 +5,7 @@ from contextlib import closing
 from time_database import TimeDatabase
 from utils import Activity,TimeStamp,Logger,TimeInterval
 
+
 class TimeTracker:
     def __init__(self, filename: str, logger: Logger, verbose=False):
         self.logger = logger
@@ -22,14 +23,14 @@ class TimeTracker:
             if db.start_exists(name):
                 self.logger.warning("This activity is already started")
                 return
-            db.insert_started_work(name, t)
+            db.insert_started_activity(name, t)
 
     def end_activity(self, name: str, t: TimeStamp) -> None:
         with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
             if not db.start_exists(name):
                 self.logger.warning("This activity is not started")
                 return
-            db.insert_finished_work(name, t)
+            db.insert_finished_activity(name, t)
 
     def show_started_work(self) -> None:
         with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:

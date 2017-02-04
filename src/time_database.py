@@ -4,6 +4,7 @@ from utils import *
 import operator
 import datetime
 
+
 class TimeDatabase:
     def __init__(self, filename: str, log: Logger, verbose=False):
         """Connects to the database"""
@@ -23,12 +24,12 @@ class TimeDatabase:
 
         cursor = self.connection.cursor()
         try:
-            cursor.execute('CREATE TABLE work_times (id integer,     \
+            cursor.execute("CREATE TABLE work_times (id INTEGER,     \
                                                      start DATETIME, \
                                                      end DATETIME,   \
-                                                     name text,      \
-                                                     diff real,      \
-                                                     primary key(id))')
+                                                     name TEXT,      \
+                                                     diff REAL,      \
+                                                     PRIMARY KEY(id))")
             self.connection.commit()
         except sqlite3.Error as err:
             self.log.error("Cannot create database")
@@ -36,7 +37,7 @@ class TimeDatabase:
         else:
             self.log.info("Created database", self.verbose)
 
-    def insert_started_work(self, name: str, date: TimeStamp) -> None:
+    def insert_started_activity(self, name: str, date: TimeStamp) -> None:
         """Stores the starting of an activity"""
 
         insert_cmd = 'insert into work_times (start, name) values (?, ?)'
@@ -50,7 +51,7 @@ class TimeDatabase:
         else:
             self.log.info("Stored in database", self.verbose)
 
-    def insert_finished_work(self, name: str, date: TimeStamp) -> None:
+    def insert_finished_activity(self, name: str, date: TimeStamp) -> None:
         """Stores the timestamp of the end of the activity"""
         """This requires that the activity was started before"""
 

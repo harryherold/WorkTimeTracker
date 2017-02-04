@@ -40,7 +40,7 @@ class TestDatabase(unittest.TestCase):
     def insert_started_work(cls):
         cls.name_one = 'Foo'
         with closing(TimeDatabase(test_db_name, cls.log)) as db:
-            db.insert_started_work(cls.name_one, cls.get_date_time_now())
+            db.insert_started_activity(cls.name_one, TimeStamp())
 
     def test_creation(self):
         expected_tables = ('work_times')
@@ -64,20 +64,20 @@ class TestDatabase(unittest.TestCase):
 
     def test_insert_finished_work(self):
         name = 'klaus'
-        start = self.get_date_time(2000, 10, 10, 12, 10)
-        end = self.get_date_time(2000, 10, 10, 13, 10)
+        start = TimeStamp(user_string="10.10.2000-12:10")
+        end = TimeStamp(user_string="10.10.2000-13:10")
 
         self.db = TimeDatabase(test_db_name, self.log)
-        self.db.insert_started_work(name, start)
-        self.db.insert_finished_work(name, end)
+        self.db.insert_started_activity(name, start)
+        self.db.insert_finished_activity(name, end)
 
         sql_cmd = 'select start, end, name, diff from work_times where name = ?'
         cursor = self.db.connection.cursor()
         cursor.execute(sql_cmd, (name,))
         row = cursor.fetchone()
 
-        self.assertEqual(row[0], start)
-        self.assertEqual(row[1], end)
+        self.assertEqual(TimeStamp(db_string=row[0]), start)
+        self.assertEqual(TimeStamp(db_string=row[1]), end)
         self.assertEqual(row[2], name)
         self.assertEqual(row[3], 1.0)
 
@@ -85,9 +85,11 @@ class TestDatabase(unittest.TestCase):
         name = 'Baz'
         with closing(TimeDatabase(test_db_name, self.log)) as db:
             self.assertFalse(db.start_exists(name))
-            db.insert_started_work(name, self.get_date_time_now())
+            db.insert_started_activity(name, TimeStamp())
             self.assertTrue(db.start_exists(name))
 
+    def test_get_activities(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
