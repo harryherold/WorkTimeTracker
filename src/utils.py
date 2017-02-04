@@ -156,3 +156,13 @@ class TimeInterval:
             return self.end - self.begin
         else:
             return timedelta(days=0, seconds=0)
+
+
+class Activity:
+    def __init__(self, start: TimeStamp, end: TimeStamp, name: str):
+        self.start = start
+        self.end = end
+        self.name = name
+
+    def __str__(self):
+        return "{} : {} - {}".format(self.name, self.start, self.end)

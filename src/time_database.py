@@ -93,35 +93,17 @@ class TimeDatabase:
         row = cursor.fetchone()
         return True if row[0] == 1 else False
 
-	# TODO test case is missing
-    def get_start_time_of_activity(self, name: str) -> TimeStamp:
-        """Returns the timestamp of given and started activity"""
-
-        select_cmd = 'select start from work_times where end is NULL and name = ? limit 1'
-        cursor = self.connection.cursor()
-        try:
-            cursor.execute(select_cmd, (name,))
-        except sqlite3.Error as err:
-            self.log.error("Cannot select time of started activities in database")
-            self.log.error("{}".format(err.args[0]))
-        else:
-            self.log.info("Selected time of started activity in database", self.verbose)
-        row = cursor.fetchone()
-        return TimeStamp(db_string=row[0])
-
-	# TODO test case is missing
-    def get_duration_of_activity(self, name: str, interval: TimeInterval):
+    # TODO test case is missing
+    def get_activities_from_interval(self, name: str, interval: TimeInterval):
         """Returns the duration that a completed activity took as a tuple of (day, hour, minute)"""
 
-        select_cmd = 'select start, end from work_times where name = ? and \
+        select_cmd = 'select name, start, end from work_times where name like ? and \
                       ((start between ? and ?) or (end between ? and ?))'
-
         cursor = self.connection.cursor()
-
         try:
-            cursor.execute(select_cmd, (name,                       \
+            cursor.execute(select_cmd, (name if name else '%', \
                                         interval.begin.db_string(), \
-                                        interval.end.db_string(),   \
+                                        interval.end.db_string(), \
                                         interval.begin.db_string(), \
                                         interval.end.db_string()))
         except sqlite3.Error as err:
@@ -130,9 +112,26 @@ class TimeDatabase:
         else:
             self.log.info("Selected times completed activities in database", self.verbose)
         rows = cursor.fetchall()
-        duration = datetime.timedelta(days=0, seconds=0)
+        activities = []
         for row in rows:
-            b = TimeStamp(db_string=row[0])
-            e = TimeStamp(db_string=row[1])
-            duration += TimeInterval(b, e).intersection(interval)
-        return duration
+            end = None if not row[2] else TimeStamp(db_string=row[2])
+            activities.append(Activity(TimeStamp(db_string=row[1]), end, row[0]))
+        return activities
+
+    # TODO test case is missing
+    def get_activities(self, activity=None):
+        select_cmd = 'select name, start, end from work_times where name like ?'
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(select_cmd, (activity if activity else '%',))
+        except sqlite3.Error as err:
+            self.log.error("Cannot select times completed activities in database")
+            self.log.error("{}".format(err.args[0]))
+        else:
+            self.log.info("Selected times completed activities in database", self.verbose)
+        rows = cursor.fetchall()
+        activities = []
+        for row in rows:
+            end = None if not row[2] else row[2]
+            activities.append(Activity(TimeStamp(db_string=row[1]), end, row[0]))
+        return activities
