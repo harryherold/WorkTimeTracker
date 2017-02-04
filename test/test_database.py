@@ -89,7 +89,26 @@ class TestDatabase(unittest.TestCase):
             self.assertTrue(db.start_exists(name))
 
     def test_get_activities(self):
-        pass
+        with closing(TimeDatabase(test_db_name, self.log)) as db:
+            cursor = db.connection.cursor()
+            cursor.execute("delete from work_times",())
+
+        name = "blub"
+        s1 = TimeStamp(user_string="10.10.1900-12:00")
+        e1 = TimeStamp(user_string="10.10.1900-14:00")
+        s2 = TimeStamp(user_string="10.10.2000-12:00")
+        e2 = TimeStamp(user_string="10.10.2000-14:00")
+        activities = []
+        with closing(TimeDatabase(test_db_name, self.log)) as db:
+            db.insert_started_activity(name, s1)
+            db.insert_finished_activity(name, e1)
+            db.insert_started_activity(name, s2)
+            db.insert_finished_activity(name, e2)
+            activities = db.get_activities(name)
+        for activity in activities:
+            self.assertEqual(name, activity.name)
+            self.assertTrue(activity.start in [s1, s2])
+            self.assertTrue(activity.end in [e1, e2])
 
 if __name__ == '__main__':
     unittest.main()
