@@ -133,6 +133,6 @@ class TimeDatabase:
         rows = cursor.fetchall()
         activities = []
         for row in rows:
-            end = None if not row[2] else row[2]
+            end = None if not row[2] else TimeStamp(db_string=row[2])
             activities.append(Activity(TimeStamp(db_string=row[1]), end, row[0]))
         return activities
