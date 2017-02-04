@@ -1,9 +1,9 @@
 import os.path
-import operator
+import datetime
 from contextlib import closing
 
 from time_database import TimeDatabase
-from utils import *
+from utils import Activity,TimeStamp,Logger,TimeInterval
 
 class TimeTracker:
     def __init__(self, filename: str, logger: Logger, verbose=False):
@@ -47,7 +47,18 @@ class TimeTracker:
             self.logger.error('Given time interval has the wrong format')
             return
         with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
-            d = db.get_duration_of_activity(activity, requested_interval)
+            activities = db.get_activities_from_interval(activity, requested_interval)
+            d = datetime.timedelta(days=0, seconds=0)
+            for activity in activities:
+                start = activity.start
+                end = TimeStamp() if not activity.end else activity.end
+                d += TimeInterval(start, end).intersection(requested_interval)
             hours = int(d.seconds / 3600)
             minutes = int((d.seconds - (hours * 3600)) / 60)
             self.logger.print('{:02d}:{:02d}:{:02d}'.format(d.days, hours, minutes))
+
+    def show_all_activities(self, activity=None):
+        with closing(TimeDatabase(self.filename, self.logger, verbose=self.verbose)) as db:
+            activities = db.get_activities()
+            for activity in activities:
+                self.logger.print(activity)
