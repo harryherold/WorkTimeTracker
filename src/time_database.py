@@ -96,7 +96,7 @@ class TimeDatabase:
 
     # TODO test case is missing
     def get_activities_from_interval(self, name: str, interval: TimeInterval):
-        """Returns the duration that a completed activity took as a tuple of (day, hour, minute)"""
+        """Returns all tracked times regarding an activity from a given interval"""
 
         select_cmd = 'select name, start, end from work_times where name like ? and \
                       ((start between ? and ?) or (end between ? and ?))'
@@ -119,8 +119,9 @@ class TimeDatabase:
             activities.append(Activity(TimeStamp(db_string=row[1]), end, row[0]))
         return activities
 
-    # TODO test case is missing
     def get_activities(self, activity=None):
+        """Returns all tracked times regarding one or no specific activity"""
+
         select_cmd = 'select name, start, end from work_times where name like ?'
         cursor = self.connection.cursor()
         try:
