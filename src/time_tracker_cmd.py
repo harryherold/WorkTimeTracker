@@ -2,14 +2,14 @@
 import sys
 import argparse
 from utils import *
+from time_tracker import *
 from config import *
-import time_tracker
+
 
 def parse_time_string(time_str: str) -> TimeStamp:
     if time_str == 'c':
-        return TimeStamp()
-    else:
-        return TimeStamp(user_string=time_str)
+        return utils.TimeStamp.now()
+    return TimeStamp(user_string=time_str)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -33,12 +33,18 @@ if __name__ == "__main__":
     parser.add_argument("--list", action='store_true',
                         help="Shows all started activities.")
 
+    parser.add_argument("--all", action='store_true',
+                        help="Shows all activities.")
+
     parser.add_argument("-v", "--verbose", action='store_true')
 
     args = parser.parse_args()
 
     logger = Logger(args.logfile)
-    tt = time_tracker.TimeTracker(db_path, logger, verbose=args.verbose)
+    tt = TimeTracker(db_path, logger, verbose=args.verbose)
+
+    if args.all:
+        tt.show_all_activities(args.activity)
 
     if args.list:
         tt.show_started_work()
