@@ -1,6 +1,6 @@
 import unittest
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 os.sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "../src")))
 
@@ -126,32 +126,35 @@ class TestTimeInterval(unittest.TestCase):
 
     def test_intersection(self):
         # Case 0: Intervals are overlapped
-        t1 = TimeStamp("1.12.2010-08:00")
-        t2 = TimeStamp("1.12.2010-09:30")
-        t3 = TimeStamp("1.12.2010-09:15")
-        t4 = TimeStamp("1.12.2010-10:00")
+        t1 = TimeStamp(user_string="1.12.2010-08:00")
+        t2 = TimeStamp(user_string="1.12.2010-09:30")
+        t3 = TimeStamp(user_string="1.12.2010-09:15")
+        t4 = TimeStamp(user_string="1.12.2010-10:00")
         ti1 = TimeInterval(t1, t2)
         ti2 = TimeInterval(t3, t4)
-        self.assertEqual(ti1.intersection(ti2), (0, 0, 15))
-        self.assertEqual(ti2.intersection(ti1), (0, 0, 15))
+        d1 = timedelta(days=0,hours=0,minutes=15)
+        self.assertEqual(ti1.intersection(ti2), d1)
+        self.assertEqual(ti2.intersection(ti1), d1)
         # Case 1: One interval contains the other
-        t1 = TimeStamp("1.12.2010-08:00")
-        t2 = TimeStamp("1.12.2010-09:30")
-        t3 = TimeStamp("1.12.2010-09:15")
-        t4 = TimeStamp("1.12.2010-09:20")
+        t1 = TimeStamp(user_string="1.12.2010-08:00")
+        t2 = TimeStamp(user_string="1.12.2010-09:30")
+        t3 = TimeStamp(user_string="1.12.2010-09:15")
+        t4 = TimeStamp(user_string="1.12.2010-09:20")
         ti1 = TimeInterval(t1, t2)
         ti2 = TimeInterval(t3, t4)
-        self.assertEqual(ti1.intersection(ti2), (0, 0, 5))
-        self.assertEqual(ti2.intersection(ti1), (0, 0, 5))
+        d1 = timedelta(days=0, hours=0, minutes=5)
+        self.assertEqual(ti1.intersection(ti2), d1)
+        self.assertEqual(ti2.intersection(ti1), d1)
         # Case 2: Intervals are disjunct
-        t1 = TimeStamp("1.12.2010-08:00")
-        t2 = TimeStamp("1.12.2010-09:30")
-        t3 = TimeStamp("1.12.2010-09:31")
-        t4 = TimeStamp("1.12.2010-09:40")
+        t1 = TimeStamp(user_string="1.12.2010-08:00")
+        t2 = TimeStamp(user_string="1.12.2010-09:30")
+        t3 = TimeStamp(user_string="1.12.2010-09:31")
+        t4 = TimeStamp(user_string="1.12.2010-09:40")
         ti1 = TimeInterval(t1, t2)
         ti2 = TimeInterval(t3, t4)
-        self.assertEqual(ti1.intersection(ti2), (0, 0, 0))
-        self.assertEqual(ti2.intersection(ti1), (0, 0, 0))
+        d1 = timedelta(days=0, hours=0, minutes=0)
+        self.assertEqual(ti1.intersection(ti2), d1)
+        self.assertEqual(ti2.intersection(ti1), d1)
 
 if __name__ == '__main__':
     unittest.main()

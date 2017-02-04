@@ -26,7 +26,7 @@ class Logger:
         if self.out is not None:
             self.out.close()
 
-    def print(self, mesg):
+    def print(self, mesg: object) -> object:
         print(mesg, file=self.out)
 
     @prepend_tag("Info")
